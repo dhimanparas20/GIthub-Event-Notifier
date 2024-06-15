@@ -3,7 +3,7 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/events',
             method: 'GET',
-            dataType: 'json', // Ensures the response is parsed as JSON
+            dataType: 'json',
             success: function(data) {
                 let eventsContainer = $('#events');
                 eventsContainer.empty();
@@ -15,16 +15,17 @@ $(document).ready(function() {
 
                 data.forEach((event, index) => {
                     let eventDiv = $('<div>').addClass('event');
+                    let eventContent;
 
-                    eventDiv.html(`
-                        <p><strong>Request ID:</strong> ${event.request_id}</p>
-                        <p><strong>Author:</strong> ${event.author}</p>
-                        <p><strong>Action:</strong> ${event.action}</p>
-                        <p><strong>From Branch:</strong> ${event.from_branch}</p>
-                        <p><strong>To Branch:</strong> ${event.to_branch}</p>
-                        <p><strong>Timestamp:</strong> ${event.timestamp}</p>
-                    `);
+                    if (event.action === "PUSH") {
+                        eventContent = `<p><strong>${event.author}</strong> pushed to <strong>${event.to_branch}</strong> on <strong>${event.timestamp}</strong></p>`;
+                    } else if (event.action === "PULL_REQUEST") {
+                        eventContent = `<p><strong>${event.author}</strong> submitted a pull request from <strong>${event.from_branch}</strong> to <strong>${event.to_branch}</strong> on <strong>${event.timestamp}</strong></p>`;
+                    } else if (event.action === "MERGE") {
+                        eventContent = `<p><strong>${event.author}</strong> merged branch <strong>${event.from_branch}</strong> to <strong>${event.to_branch}</strong> on <strong>${event.timestamp}</strong></p>`;
+                    }
 
+                    eventDiv.html(eventContent);
                     eventsContainer.append(eventDiv);
 
                     // Add a horizontal rule if it's not the last element
@@ -40,5 +41,5 @@ $(document).ready(function() {
     }
 
     fetchData();
-    setInterval(fetchData, 5000);
+    setInterval(fetchData, 15000);
 });
